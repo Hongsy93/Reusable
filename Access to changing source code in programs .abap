@@ -1,0 +1,46 @@
+*&---------------------------------------------------------------------*
+*& Report  ZTM_CODE
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  ZTM_CODE_TEST.
+
+TABLES: TRDIR.
+
+TYPES : BEGIN OF ITYPE,
+         LINE(255).
+TYPES : END OF ITYPE.
+
+DATA : ITAB         TYPE ITYPE OCCURS 0 WITH HEADER LINE.
+DATA : PROG_TMP(90) TYPE C.
+DATA  : PROG_BAK(90) TYPE C.
+
+PARAMETERS : PROGRAM LIKE TRDIR-NAME.
+PARAMETERS : EXPERT AS CHECKBOX.
+
+CONCATENATE 'z_tmp' SY-DATUM
+             SY-UZEIT '_' SY-UNAME
+             INTO PROG_TMP.
+
+CONCATENATE 'z_bak' SY-DATUM
+             SY-UZEIT '_' SY-UNAME
+             INTO PROG_BAK.
+
+IF EXPERT = 'X'.
+  READ REPORT PROGRAM INTO ITAB.
+  INSERT REPORT PROG_BAK FROM ITAB.
+  EDITOR-CALL FOR ITAB.
+  INSERT REPORT PROGRAM FROM ITAB.
+ENDIF.
+
+IF EXPERT = ''.
+  READ REPORT PROGRAM INTO ITAB.
+  INSERT REPORT PROG_TMP FROM ITAB.
+  INSERT REPORT PROG_BAK FROM ITAB.
+  EDITOR-CALL FOR REPORT PROG_TMP.
+  READ REPORT PROG_TMP INTO ITAB.
+  INSERT REPORT PROGRAM FROM ITAB.
+ENDIF.
